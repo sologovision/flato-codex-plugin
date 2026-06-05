@@ -1,30 +1,29 @@
-# Flato Codex Plugin
+# Flato MCP for Codex
 
-Flato MCP Operator is a Codex plugin for using Flato MCP from Codex.
+Use Flato MCP from Codex to create, inspect, and edit Flato design projects.
 
-It bundles:
+This plugin connects Codex to the production Flato MCP service:
 
-- a Flato MCP server configuration for `https://api.flato.ai/api/mcp/editor`
-- a Codex skill that tells Codex to actively read Flato MCP resources, prompts,
-  design skills, brand kits, project state, feedback, and visual QA results
-- marketplace metadata so Codex App can discover and install the plugin
+```text
+https://api.flato.ai/api/mcp/editor
+```
 
-## Install From Codex App
+## Requirements
+
+- Codex App
+- A Flato account
+- Permission to authorize Flato MCP in your browser
+
+## Install In Codex App
 
 1. Open Codex App.
-2. Open **Plugins** from the left sidebar.
-3. Open the marketplace/source dropdown.
+2. Select **Plugins** in the left sidebar.
+3. Open the plugin source dropdown.
 4. Select **Add more**.
 5. In **Source**, enter:
 
 ```text
 sologovision/flato-codex-plugin
-```
-
-or:
-
-```text
-git@github.com:sologovision/flato-codex-plugin.git
 ```
 
 6. In **Git ref**, enter:
@@ -33,93 +32,68 @@ git@github.com:sologovision/flato-codex-plugin.git
 main
 ```
 
-7. Leave **Sparse path** empty. This repository stores
-   `.agents/plugins/marketplace.json` and `plugins/flato-mcp-operator/` at the
-   repository root.
+7. Leave **Sparse path** empty.
 8. Select **Add marketplace**.
-9. Choose the **Flato** marketplace from the source dropdown.
+9. Select the **Flato** source from the source dropdown.
 10. Install **Flato MCP Operator**.
 11. Restart Codex App or open a new Codex thread.
-12. Complete Flato MCP OAuth when prompted.
+12. Complete the Flato OAuth authorization when prompted.
 
-## Install From Codex CLI
+## Optional CLI Install
 
-Codex CLI installation is optional, but useful for technical users and
-automation. Installing Codex App alone does not guarantee that the `codex`
-command is available in a terminal.
+If you use Codex CLI, you can install the same plugin with:
 
 ```bash
 codex plugin marketplace add sologovision/flato-codex-plugin
 codex plugin add flato-mcp-operator@flato
 ```
 
-If OAuth does not start automatically:
+If Flato OAuth does not start automatically:
 
 ```bash
 codex mcp login flato-editor
 ```
 
-## Verify
+## First Use
 
-Start a new Codex thread and ask:
+Open a new Codex thread and ask:
 
 ```text
 Use Flato MCP and call flato_whoami first.
 ```
 
-Expected behavior:
-
-- Codex loads the Flato MCP Operator skill.
-- Codex connects to the `flato-editor` MCP server after OAuth.
-- Codex calls `flato_whoami` before editing.
-- For design work, Codex should actively read Flato MCP protocol, prompt-skill,
-  and brand-kit resources before writing.
-
-## Repository Structure
+After authorization, you can ask Codex to work with Flato designs, for example:
 
 ```text
-.agents/
-  plugins/
-    marketplace.json
-plugins/
-  flato-mcp-operator/
-    .codex-plugin/
-      plugin.json
-    .mcp.json
-    skills/
-      flato-mcp-operator/
-        SKILL.md
+Use Flato MCP to create a one-page product launch visual.
 ```
-
-## Production Endpoint
-
-The bundled MCP server points to production:
 
 ```text
-https://api.flato.ai/api/mcp/editor
+Use Flato MCP to edit this Flato project: https://www.flato.ai/editor/PROJECT_ID
 ```
-
-For staging, publish a separate branch or plugin variant with `.mcp.json`
-pointing to:
 
 ```text
-https://test1-api.flato.ai/api/mcp/editor
+Use Flato MCP to revise the selected block in my open Flato editor.
 ```
 
-## What The Skill Enforces
+## How It Works
 
-For Flato MCP design work, the plugin tells Codex to:
+The plugin gives Codex the Flato MCP server and a Flato-specific workflow. For
+design work, Codex is guided to read Flato design resources, use your Flato
+brand kits when relevant, target real page and block IDs, and verify edits
+before reporting completion.
 
-- read `flato://protocol/creative-v1`
-- read `flato://prompt-skills`
-- choose and read the matching design skill resource
-- check `flato://brand-kits` for brand-sensitive work
-- call `flato_whoami`
-- establish or create the target project
-- wait until `flato_get_project_status` reports `canWrite=true`
-- call `flato_get_design_context` before writing
-- use explicit `pageId` and `blockId` values
-- inspect `mcpFeedback` and `layoutIssueSummary` after writes
-- export and inspect important output with `flato_export_to_png` and
-  `flato_understand_image`
+## Troubleshooting
+
+If the plugin is installed but Codex does not see `flato_*` tools, restart
+Codex App and open a new thread.
+
+If authorization does not start automatically, run:
+
+```bash
+codex mcp login flato-editor
+```
+
+If Codex says the editor is not writable, open or refresh the Flato editor page
+in your browser, then ask Codex to check the project status again.
 
