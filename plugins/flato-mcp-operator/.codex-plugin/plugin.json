@@ -1,6 +1,6 @@
 {
   "name": "flato-mcp-operator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Operate Flato designs through the Flato MCP server with the required project, context, write, and QA workflow.",
   "author": {
     "name": "Flato"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Flato MCP Operator",
     "shortDescription": "Guide Codex through reliable Flato MCP design editing.",
-    "longDescription": "Installs the Flato MCP server configuration and a workflow skill that tells Codex how to establish a project, read Flato creative context, use explicit page and block ids, apply design edits, inspect MCP feedback, and verify rendered output.",
+    "longDescription": "Installs the Flato MCP server configuration and a workflow skill that tells Codex how to establish a project, read Flato canvas fundamentals, prompt skills, brand kits, font resources, and visual themes, use explicit page and block ids, apply design edits, inspect MCP feedback, and verify rendered output.",
     "developerName": "Flato",
     "category": "Productivity",
     "capabilities": [

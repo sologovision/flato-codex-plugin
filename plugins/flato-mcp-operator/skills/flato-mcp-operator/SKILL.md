@@ -1,41 +1,48 @@
 ---
 name: flato-mcp-operator
-description: Use when creating, editing, inspecting, exporting, or troubleshooting Flato designs through Flato MCP tools such as flato_whoami, flato_use_project, flato_get_design_context, flato_create_pages, flato_update_pages, flato_update_canvas, flato_export_to_png, and related flato_* tools.
+description: Use when creating, editing, inspecting, exporting, branding, styling, or troubleshooting Flato designs through Flato MCP tools such as flato_whoami, flato_get_canvas_fundamentals, flato_use_project, flato_get_design_context, flato_create_pages, flato_update_pages, flato_update_canvas, flato_export_to_png, and related flato_* tools.
 ---
 
 # Flato MCP Operator
 
 Use this skill whenever the user wants Codex to operate a Flato design through MCP.
 
-Flato is a live visual design editor. The MCP server gives Codex editor tools, design resources, prompt-skill resources, brand-kit resources, image asset tools, and feedback. It is not a hidden one-shot design agent. Codex must read current Flato context explicitly and then call concrete MCP tools.
+Flato is a live visual design editor. The MCP server gives Codex editor tools, canvas authoring rules, design-skill resources, user brand kits, CJK font resources, image asset tools, export tools, and feedback. It is not a hidden one-shot design agent. Codex must read current Flato context explicitly and then call concrete MCP tools.
 
 ## Non-Negotiable Resource Policy
 
-Codex must not rely only on tool descriptions for Flato work. The MCP resources and prompts are part of the operating contract.
+Codex must not rely only on tool descriptions for Flato work. MCP resources and prompts are part of the operating contract.
 
 For every Flato MCP task that creates, edits, styles, brands, exports, or troubleshoots a design:
 
-1. Actively enumerate or read Flato MCP resources before writing.
-2. Actively select and read the scenario design skill resource.
-3. Actively check user brand-kit resources when brand constraints are possible.
-4. Use MCP workflow prompts when the host exposes prompt invocation. If prompt invocation is unavailable, follow the equivalent workflow in this skill and the prompt-skill resource.
+1. Read `flato://canvas/fundamentals-v1` before writing. If resource reading is unavailable, call `flato_get_canvas_fundamentals`.
+2. Read `flato://prompt-skills` and then the matching scenario skill resource.
+3. Read `flato://brand-kits` when brand constraints are possible.
+4. Read `flato://fonts/cjk` or a filtered CJK font resource when Chinese, Japanese, or Korean typography matters.
+5. Use MCP workflow prompts when the host exposes prompt invocation. If prompt invocation is unavailable, follow the equivalent workflow in this skill and the prompt-skill resource.
 
 Do not wait for the user to ask for these resources. Do not skip them because `flato_get_design_context` is available. Design context tells Codex what is on the canvas; resources tell Codex how to use Flato and how to design for the scenario.
 
-## Resource Inventory
+## Current Resource Inventory
 
 Expected Flato MCP resources:
 
-- `flato://protocol/creative-v1`: required canvas authoring guide and Flato MCP contract.
+- `flato://canvas/fundamentals-v1`: required canvas authoring guide and Flato MCP contract.
+- `flato://design-guides/default-visual-themes`: platform fallback visual themes when no user brand kit or explicit visual direction is available.
 - `flato://prompt-skills`: index of built-in Flato design scenario skills.
 - `flato://prompt-skills/general-design-default`: default composition and design workflow.
-- `flato://prompt-skills/presentation-cover`: presentation, pitch deck, slides, PPT, proposal, report.
+- `flato://prompt-skills/presentation`: presentation, pitch deck, slides, PPT, proposal, report.
 - `flato://prompt-skills/social-visual`: poster, campaign, social post, ad creative.
 - `flato://prompt-skills/brand-system`: brand identity, brand kit, guideline, design system.
 - `flato://prompt-skills/logo-generation`: logo, icon mark, identity symbol.
 - `flato://prompt-skills/motion-design`: motion, animation, timeline, interaction-heavy output.
 - `flato://brand-kits`: authenticated user's brand-kit index.
 - `flato://brand-kits/{skillId}`: authenticated user's normalized brand-system document.
+- `flato://fonts/cjk`: Agent-visible Chinese, Japanese, and Korean font index.
+- `flato://fonts/cjk/by-language/{language}`: filtered CJK fonts, for example `zh-CN`, `ja`, or `ko`.
+- `flato://fonts/cjk/by-category/{category}`: filtered CJK fonts by category.
+- `flato://fonts/cjk/by-style/{style}`: filtered CJK fonts by style tag.
+- `flato://fonts/cjk/font/{fontId}`: detailed metadata for one CJK font.
 
 Expected Flato MCP prompts:
 
@@ -46,40 +53,41 @@ Expected Flato MCP prompts:
 - `apply_brand_kit`
 - `revise_selected_block`
 
-When MCP resource listing is available, list resources first and prefer exact listed URIs. When direct resource reading is not available in the host, call `flato_get_creative_protocol` as the protocol fallback and continue with the best available tool/context flow. Do not invent brand-kit ids or prompt-skill ids.
+When MCP resource listing is available, list resources first and prefer exact listed URIs. Do not invent brand-kit ids, prompt-skill ids, font ids, page ids, or block ids.
 
 ## Required Context Bootstrap
 
 Before any Flato design write:
 
-1. List or read Flato MCP resources.
-2. Read `flato://protocol/creative-v1`. If resource reading is unavailable or unreliable, call `flato_get_creative_protocol`.
-3. Read `flato://prompt-skills` to see the current design-skill index when resource reading is available.
-4. Select and read exactly one primary scenario skill resource before writing:
-   - Presentation, pitch deck, deck, slide, proposal, or report: `flato://prompt-skills/presentation-cover`.
+1. Read `flato://canvas/fundamentals-v1`. If the host cannot read resources, call `flato_get_canvas_fundamentals`.
+2. Read `flato://prompt-skills` to see the current design-skill index when resource reading is available.
+3. Select and read exactly one primary scenario skill resource before writing:
+   - Presentation, pitch deck, deck, slide, proposal, or report: `flato://prompt-skills/presentation`.
    - Poster, social post, campaign visual, ad creative, or marketing image: `flato://prompt-skills/social-visual`.
    - Brand identity, brand guideline, design system, or brand kit: `flato://prompt-skills/brand-system`.
    - Logo or icon mark: `flato://prompt-skills/logo-generation`.
    - Motion, animation, or interaction-heavy design: `flato://prompt-skills/motion-design`.
    - Otherwise: `flato://prompt-skills/general-design-default`.
-5. If the user asks to apply a brand, uses brand-like wording, names a company/product, requests on-brand output, or the scenario is brand/logo/guideline/presentation/social marketing, read `flato://brand-kits`.
-6. If `flato://brand-kits` returns one clearly relevant brand kit, read `flato://brand-kits/{skillId}`. If multiple are plausible and the user did not name one, ask the user which brand kit to apply before writing branded changes.
-7. If the host exposes MCP prompts, invoke the closest workflow prompt with the task brief, selected `brandKitId` when any, and target reference when any:
+4. If the user asks to apply a brand, uses brand-like wording, names a company/product, requests on-brand output, or the scenario is brand/logo/guideline/presentation/social marketing, read `flato://brand-kits`.
+5. If `flato://brand-kits` returns one clearly relevant brand kit, read `flato://brand-kits/{skillId}`. If multiple are plausible and the user did not name one, ask the user which brand kit to apply before writing branded changes.
+6. If CJK typography matters, read `flato://fonts/cjk` or a filtered resource such as `flato://fonts/cjk/by-language/zh-CN`, then use the returned `usageCss` or `family` in `.Canvas` CSS or text block styles.
+7. If no brand kit or explicit visual direction is available for a new design, read `flato://design-guides/default-visual-themes` and choose one theme before defining the visual system.
+8. If the host exposes MCP prompts, invoke the closest workflow prompt with the task brief, selected `brandKitId` when any, and target reference when any:
    - New general page: `create_single_page_design`.
    - Presentation or slide: `create_presentation_slide`.
    - Social/poster/campaign/ad: `create_social_visual`.
    - Brand-system output: `create_brand_system_design`.
    - Applying a brand kit: `apply_brand_kit`.
    - Editing selected/targeted block: `revise_selected_block`.
-8. Call `flato_whoami`.
-9. Establish a target project:
+9. Call `flato_whoami`.
+10. Establish a target project:
    - New design: choose a concise saved `projectName`, then call `flato_create_project`.
    - Existing editor URL or project id: call `flato_use_project`.
    - Share URL: call `flato_use_share_link` to create an editable copy.
-10. If the response says `waiting_for_live_editor_bridge` or `needs_open_editor`, have the MCP host open `editorUrl` automatically when supported. If the host cannot open it, ask the user to open `editorUrl`.
-11. Poll `flato_get_project_status` until `canWrite=true`.
-12. Do not call design-context, write, or export tools until `canWrite=true`.
-13. Call `flato_get_design_context` before every create/edit sequence.
+11. If the response says `waiting_for_live_editor_bridge` or `needs_open_editor`, have the MCP host open `editorUrl` automatically when supported. If the host cannot open it, ask the user to open `editorUrl`.
+12. Poll `flato_get_project_status` until `canWrite=true`.
+13. Do not call design-context, write, or export tools until `canWrite=true`.
+14. Call `flato_get_design_context` before every create/edit sequence.
 
 If the current Codex conversation cannot see `flato_*` tools after setup, treat it as a Codex tool-loading boundary. Ask the user to start a new Codex conversation or restart Codex App, then verify with `flato_whoami`. Do not inspect local OAuth or token stores as a workaround.
 
@@ -97,11 +105,11 @@ After reading a prompt-skill resource:
 
 For mixed tasks, choose one primary scenario skill and optionally read one secondary skill only if it changes execution. Examples:
 
-- Branded pitch deck: primary `presentation-cover`, plus read brand-kit resources; read `brand-system` only if creating or restructuring brand guidelines.
+- Branded pitch deck: primary `presentation`, plus read brand-kit resources; read `brand-system` only if creating or restructuring brand guidelines.
 - Social ad using a logo: primary `social-visual`, plus read the selected brand kit; do not use `logo-generation` unless generating a new logo.
-- Animated slide: primary `presentation-cover`, plus `motion-design` as secondary.
+- Animated slide: primary `presentation`, plus `motion-design` as secondary.
 
-## Brand-Kit Usage
+## Brand, Font, And Theme Usage
 
 Brand-kit resources are user-scoped and must be treated as first-class context.
 
@@ -119,8 +127,12 @@ After reading a specific `flato://brand-kits/{skillId}`:
 - Use `flato_set_global_style` for reusable brand tokens and shared CSS under `.Canvas`.
 - Use block/page styles for local composition.
 - If brand-kit constraints are incomplete, state the missing piece and continue with the available brand facts.
- 
+
 Do not fabricate brand colors, fonts, logos, or slogans when a brand-kit resource is available. Do not claim a design is branded unless the relevant brand-kit resource was read or the user supplied the brand facts directly.
+
+For CJK typography, do not call a font search tool. Read the CJK font resources and use returned `usageCss`, `family`, fallback, and license metadata. Prefer language-filtered resources when the language is known.
+
+For unbranded new work, use `flato://design-guides/default-visual-themes` as a fallback visual direction after the user request and prompt-skill resource.
 
 ## Targeting Rules
 
@@ -137,10 +149,12 @@ Do not fabricate brand colors, fonts, logos, or slogans when a brand-kit resourc
 ## Read Tools
 
 - Use `flato_get_design_context` as the standard rich context read. It includes effective canvas, current page, selected blocks, page summaries, global style, layout analysis, and `layoutIssueSummary`.
-- Use `flato_get_state` for project/page/block detail, `content_outline`, or specific page ids.
+- Use `flato_get_state` for project/page/block detail or specific page ids.
+- Use `flato_get_state({ view: "content_outline" })` when planning or auditing multi-page content and the full block payload is unnecessary.
+- Use `flato_get_state({ view: "layout_issues" })` when only compact layout QA is needed.
 - Use `flato_get_style_info` before changing an existing visual system.
-- Use `flato_search_cjk_fonts` when Chinese, Japanese, or Korean typography quality matters.
-- Use brand-kit resources when brand constraints matter: first `flato://brand-kits`, then `flato://brand-kits/{skillId}`. Brand-kit resources are not optional for branded work.
+- Use brand-kit resources when brand constraints matter: first `flato://brand-kits`, then `flato://brand-kits/{skillId}`.
+- Use CJK font resources when CJK typography quality matters: first `flato://fonts/cjk` or a filtered resource, then details through `flato://fonts/cjk/font/{fontId}` when needed.
 - Use prompt-skill resources before deciding layout patterns. Do not decide the composition from the user prompt alone when a matching Flato prompt skill exists.
 
 ## Write Tools
@@ -182,19 +196,23 @@ After a write:
 1. Inspect the returned `mcpFeedback` when present.
 2. Re-read `flato_get_design_context`.
 3. Use `layoutIssueSummary` as the compact QA decision field.
-4. Check the result against the selected prompt-skill resource and any brand-kit resource, not only against geometric layout.
-5. If `mcpFeedback.status` is `applied`, continue or finalize.
-6. If `mcpFeedback.status` is `applied_with_issues`, fix only the reported affected page or block ids. Do not rebuild the whole page unless the user asks.
-7. If `mcpFeedback.status` is `no_effect`, re-read context and retry only with verified ids.
-8. If `mcpFeedback.status` is `asset_ready`, write the returned asset URL into a page or block before claiming the design was updated.
-9. If `mcpFeedback.status` is `failed`, follow its recommended next action or report the specific blocker.
+4. Use `flato_get_state({ view: "layout_issues" })` when you only need layout QA after a write.
+5. Check the result against the selected prompt-skill resource and any brand-kit resource, not only against geometric layout.
+6. If `mcpFeedback.status` is `applied`, continue or finalize.
+7. If `mcpFeedback.status` is `applied_with_issues`, fix only the reported affected page or block ids. Do not rebuild the whole page unless the user asks.
+8. If `mcpFeedback.status` is `no_effect`, re-read context and retry only with verified ids.
+9. If `mcpFeedback.status` is `asset_ready`, write the returned asset URL into a page or block before claiming the design was updated.
+10. If `mcpFeedback.status` is `failed`, follow its recommended next action or report the specific blocker.
 
 For important generated or revised output, call `flato_export_to_png` with exactly one of `pageId`, `blockId`, or `pageIndex`. Then call `flato_understand_image` on the returned `imageUrl` to inspect composition, readability, overlap, cropping, and visual fit. Iterate only on concrete issues.
 
 Final visual QA must answer:
 
+- Was `flato://canvas/fundamentals-v1` or `flato_get_canvas_fundamentals` read?
+- Which prompt-skill resource was read?
+- If a brand kit was relevant, which brand-kit resource was read?
+- If CJK typography mattered, which font resource was read?
 - Does the page satisfy the selected prompt-skill's structure and quality checklist?
-- If a brand kit was read, are colors, type, logo/imagery direction, and tone consistent with it?
 - Are all text blocks readable and non-overlapping?
 - Are image assets actually placed in the design, not merely generated?
 - Did the tool result or `layoutIssueSummary` identify any target-specific issue that still needs a fix?
@@ -209,9 +227,11 @@ Final visual QA must answer:
 
 When the task is done, report the concrete target and result:
 
-- protocol resource or fallback read
+- canvas fundamentals resource or fallback read
 - prompt-skill resource read
 - brand-kit resource read, or why none was applicable
+- CJK font resource read when applicable
+- default visual theme resource read when used
 - workflow prompt used when available
 - `projectId`
 - `clientId` when tab-bound

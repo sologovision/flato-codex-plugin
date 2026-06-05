@@ -39,6 +39,22 @@ main
 11. Restart Codex App or open a new Codex thread.
 12. Complete the Flato OAuth authorization when prompted.
 
+## Update In Codex App
+
+When a new plugin version is published:
+
+1. Open Codex App.
+2. Select **Plugins** in the left sidebar.
+3. Select the **Flato** source from the source dropdown.
+4. Refresh or re-add the marketplace with:
+
+```text
+sologovision/flato-codex-plugin
+```
+
+5. Reinstall or update **Flato MCP Operator**.
+6. Restart Codex App or open a new Codex thread.
+
 ## Optional CLI Install
 
 If you use Codex CLI, you can install the same plugin with:
@@ -79,9 +95,10 @@ Use Flato MCP to revise the selected block in my open Flato editor.
 ## How It Works
 
 The plugin gives Codex the Flato MCP server and a Flato-specific workflow. For
-design work, Codex is guided to read Flato design resources, use your Flato
-brand kits when relevant, target real page and block IDs, and verify edits
-before reporting completion.
+design work, Codex is guided to read Flato canvas fundamentals, prompt-skill
+resources, brand kits, CJK font resources, and default visual themes when
+relevant. It then targets real page and block IDs, applies design edits, and
+verifies results before reporting completion.
 
 ## Troubleshooting
 
@@ -96,4 +113,3 @@ codex mcp login flato-editor
 
 If Codex says the editor is not writable, open or refresh the Flato editor page
 in your browser, then ask Codex to check the project status again.
-
