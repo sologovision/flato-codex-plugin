@@ -1,0 +1,20 @@
+{
+  "name": "flato",
+  "interface": {
+    "displayName": "Flato"
+  },
+  "plugins": [
+    {
+      "name": "flato-mcp-operator",
+      "source": {
+        "source": "local",
+        "path": "./plugins/flato-mcp-operator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
